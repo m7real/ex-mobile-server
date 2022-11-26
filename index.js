@@ -35,8 +35,8 @@ function verifyJWT(req, res, next) {
 
 async function run() {
   try {
-// prettier-ignore
-    } finally {
+    const categoriesCollection = client.db("exMobile").collection("categories");
+  } finally {
 // prettier-ignore
 
     }
