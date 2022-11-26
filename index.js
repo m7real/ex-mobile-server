@@ -37,6 +37,7 @@ async function run() {
   try {
     const categoriesCollection = client.db("exMobile").collection("categories");
     const usersCollection = client.db("exMobile").collection("users");
+    const productsCollection = client.db("exMobile").collection("products");
 
     // middleware to verify Admin
     // !NOTE: make sure you use verifyAdmin only after verifyJWT
@@ -69,6 +70,17 @@ async function run() {
       const query = {};
       const categories = await categoriesCollection.find(query).toArray();
       res.send(categories);
+    });
+
+    // api to get products by category id
+    // todo: add verifyJWT
+    app.get("/products", async (req, res) => {
+      const category_id = req.query.category;
+      const query = {
+        category_id: category_id,
+      };
+      const products = await productsCollection.find(query).toArray();
+      res.send(products);
     });
 
     // issue JWT
