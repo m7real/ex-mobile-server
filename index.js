@@ -36,6 +36,7 @@ function verifyJWT(req, res, next) {
 async function run() {
   try {
     const categoriesCollection = client.db("exMobile").collection("categories");
+    const usersCollection = client.db("exMobile").collection("users");
 
     // middleware to verify Admin
     // !NOTE: make sure you use verifyAdmin only after verifyJWT
@@ -78,10 +79,17 @@ async function run() {
       };
       const user = await usersCollection.findOne(query);
       if (user) {
-        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "7d" });
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "9d" });
         return res.send({ accessToken: token });
       }
       res.status(403).send({ accessToken: "" });
+    });
+
+    // save new user
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
     });
   } finally {
 // prettier-ignore
