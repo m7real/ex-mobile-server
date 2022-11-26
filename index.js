@@ -63,6 +63,13 @@ async function run() {
       next();
     };
 
+    // api to get categories
+    app.get("/categories", async (req, res) => {
+      const query = {};
+      const categories = await categoriesCollection.find(query).toArray();
+      res.send(categories);
+    });
+
     // issue JWT
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
