@@ -36,6 +36,32 @@ function verifyJWT(req, res, next) {
 async function run() {
   try {
     const categoriesCollection = client.db("exMobile").collection("categories");
+
+    // middleware to verify Admin
+    // !NOTE: make sure you use verifyAdmin only after verifyJWT
+    const verifyAdmin = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+
+      if (user?.role !== "admin") {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
+    };
+
+    // middleware to verify Seller
+    // !NOTE: make sure you use verifySeller only after verifyJWT
+    const verifySeller = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+
+      if (user?.role !== "seller") {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
+    };
   } finally {
 // prettier-ignore
 
