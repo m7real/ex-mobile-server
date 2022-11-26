@@ -79,7 +79,7 @@ async function run() {
       };
       const user = await usersCollection.findOne(query);
       if (user) {
-        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: "9d" });
+        const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "9d" });
         return res.send({ accessToken: token });
       }
       res.status(403).send({ accessToken: "" });
@@ -88,6 +88,15 @@ async function run() {
     // save new user
     app.post("/users", async (req, res) => {
       const user = req.body;
+      const email = user.email;
+      const query = {
+        email: email,
+      };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ acknowledged: true });
+      }
+
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
