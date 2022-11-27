@@ -24,8 +24,9 @@ function verifyJWT(req, res, next) {
   }
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
     if (err) {
+      console.log(err);
       return res.status(403).send({ message: "forbidden access" });
     }
     req.decoded = decoded;
@@ -73,14 +74,27 @@ async function run() {
     });
 
     // api to get products by category id
-    // todo: add verifyJWT
-    app.get("/products", async (req, res) => {
-      const category_id = req.query.category;
+    app.get("/products", verifyJWT, async (req, res) => {
+      const categoryId = req.query.category;
       const query = {
-        category_id: category_id,
+        categoryId: categoryId,
       };
       const products = await productsCollection.find(query).toArray();
+      // processing the used years of every product
+      if (products.length > 0) {
+        products.forEach((product) => {
+          product.usedYears = new Date().getFullYear() - product.purchasedYear;
+        });
+      }
       res.send(products);
+    });
+
+    // api to post new product
+    app.post("/products", verifyJWT, verifySeller, async (req, res) => {
+      const product = req.body;
+      product.posted = new Date().getTime();
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
     });
 
     // issue JWT
