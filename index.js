@@ -97,6 +97,22 @@ async function run() {
       res.status(403).send({ accessToken: "" });
     });
 
+    // checks user role for admin
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
+    });
+
+    // checks user role for seller
+    app.get("/users/seller/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isSeller: user?.role === "seller" });
+    });
+
     // save new user
     app.post("/users", async (req, res) => {
       const user = req.body;
