@@ -77,11 +77,17 @@ async function run() {
     app.get("/products", verifyJWT, async (req, res) => {
       let query = {};
       const categoryId = req.query.category;
+      const reportedProducts = req.query.reported;
       const email = req.query.email;
       const decodedEmail = req.decoded.email;
       if (categoryId) {
         query = {
           categoryId: categoryId,
+        };
+      }
+      if (reportedProducts) {
+        query = {
+          reported: true,
         };
       }
       if (email) {
@@ -116,6 +122,7 @@ async function run() {
     app.put("/products/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const product = req.body.product;
+      // this info helps to conditionally serve all product update requests with one API
       const info = req.body.info;
       const decodedEmail = req.decoded.email;
 
