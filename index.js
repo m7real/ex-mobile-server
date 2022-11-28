@@ -75,17 +75,32 @@ async function run() {
 
     // api to get products by category id
     app.get("/products", verifyJWT, async (req, res) => {
+      let query = {};
       const categoryId = req.query.category;
-      const query = {
-        categoryId: categoryId,
-      };
+      const email = req.query.email;
+      const decodedEmail = req.decoded.email;
+      if (categoryId) {
+        query = {
+          categoryId: categoryId,
+        };
+      }
+      if (email) {
+        if (email !== decodedEmail) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+        query = {
+          sellerEmail: email,
+        };
+      }
       const products = await productsCollection.find(query).toArray();
+
       // processing the used years of every product
       if (products.length > 0) {
         products.forEach((product) => {
           product.usedYears = new Date().getFullYear() - product.purchasedYear;
         });
       }
+
       res.send(products);
     });
 
@@ -94,6 +109,26 @@ async function run() {
       const product = req.body;
       product.posted = new Date().getTime();
       const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    // api to delete a product
+    app.delete("/products/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const decodedEmail = req.decoded.email;
+      const filter = {
+        _id: ObjectId(id),
+      };
+      const product = await productsCollection.findOne(filter);
+      const query = { email: decodedEmail };
+      const user = await usersCollection.findOne(query);
+
+      // checks for the appropriate seller or admin to delete a product
+      if (user?.role !== "admin" && decodedEmail !== product.sellerEmail) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      const result = await productsCollection.deleteOne(filter);
       res.send(result);
     });
 
@@ -119,12 +154,12 @@ async function run() {
       res.send({ isAdmin: user?.role === "admin" });
     });
 
-    // checks user role for seller
+    // checks user role for seller & also gives seller info
     app.get("/users/seller/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      res.send({ isSeller: user?.role === "seller" });
+      res.send({ isSeller: user?.role === "seller", seller: user });
     });
 
     // save new user
