@@ -39,6 +39,8 @@ async function run() {
     const categoriesCollection = client.db("exMobile").collection("categories");
     const usersCollection = client.db("exMobile").collection("users");
     const productsCollection = client.db("exMobile").collection("products");
+    const blogsCollection = client.db("foodFly").collection("blogs");
+    const faqsCollection = client.db("foodFly").collection("faqs");
 
     // middleware to verify Admin
     // !NOTE: make sure you use verifyAdmin only after verifyJWT
@@ -174,6 +176,21 @@ async function run() {
       }
 
       const result = await productsCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    // get blog
+    app.get("/blog", async (req, res) => {
+      const query = {};
+      const cursor = blogsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // get faq
+    app.get("/faq", async (req, res) => {
+      const query = {};
+      const cursor = faqsCollection.find(query);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
