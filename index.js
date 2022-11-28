@@ -83,6 +83,7 @@ async function run() {
       if (categoryId) {
         query = {
           categoryId: categoryId,
+          status: "available",
         };
       }
       if (reportedProducts) {
@@ -204,6 +205,24 @@ async function run() {
       const query = { email: email };
       const user = await usersCollection.findOne(query);
       res.send({ isSeller: user?.role === "seller", seller: user });
+    });
+
+    // get users (sellers or buyers)
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
+      const userType = req.query.userType;
+      let query = {};
+      if (userType === "seller") {
+        query = {
+          role: "seller",
+        };
+      }
+      if (userType === "buyer") {
+        query = {
+          role: "buyer",
+        };
+      }
+      const users = await usersCollection.find(query).toArray();
+      res.send(users);
     });
 
     // save new user
