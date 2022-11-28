@@ -81,7 +81,7 @@ async function run() {
       const usersCount = await usersCollection.estimatedDocumentCount();
       const productsCount = await productsCollection.estimatedDocumentCount();
       const bookingsCount = await bookingsCollection.estimatedDocumentCount();
-      res.send({ usersCount });
+      res.send({ usersCount, productsCount, bookingsCount });
     });
 
     // api to get advertised products
@@ -194,6 +194,29 @@ async function run() {
       }
 
       const result = await productsCollection.deleteOne(filter);
+      res.send(result);
+    });
+
+    // api to get bookings
+    app.get("/bookings", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      const query = {
+        buyerEmail: email,
+      };
+      const bookings = await bookingsCollection.find(query).toArray();
+      res.send(bookings);
+    });
+
+    // api to post booking
+    app.post("/bookings", verifyJWT, async (req, res) => {
+      const booking = req.body;
+      const result = await bookingsCollection.insertOne(booking);
       res.send(result);
     });
 
