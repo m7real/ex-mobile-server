@@ -115,23 +115,31 @@ async function run() {
     // api to update a product
     app.put("/products/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const product = req.body;
+      const product = req.body.product;
+      const info = req.body.info;
       const decodedEmail = req.decoded.email;
 
-      // checks for the appropriate seller and also product as we are checking seller email from this product
-      if (id !== product._id || decodedEmail !== product.sellerEmail) {
-        return res.status(403).send({ message: "forbidden access" });
+      let filter = {};
+      const options = { upsert: true };
+
+      let updatedDoc = {};
+      if (info === "advertise") {
+        // checks for the appropriate seller and also product as we are checking seller email from this product
+        if (id !== product._id || decodedEmail !== product.sellerEmail) {
+          return res.status(403).send({ message: "forbidden access" });
+        }
+
+        filter = {
+          _id: ObjectId(id),
+        };
+
+        updatedDoc = {
+          $set: {
+            advertised: true,
+          },
+        };
       }
 
-      const filter = {
-        _id: ObjectId(id),
-      };
-      const options = { upsert: true };
-      const updatedDoc = {
-        $set: {
-          advertised: true,
-        },
-      };
       const result = await productsCollection.updateOne(filter, updatedDoc, options);
       res.send(result);
     });
