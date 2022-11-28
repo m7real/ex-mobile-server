@@ -112,6 +112,30 @@ async function run() {
       res.send(result);
     });
 
+    // api to update a product
+    app.put("/products/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const product = req.body;
+      const decodedEmail = req.decoded.email;
+
+      // checks for the appropriate seller and also product as we are checking seller email from this product
+      if (id !== product._id || decodedEmail !== product.sellerEmail) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+
+      const filter = {
+        _id: ObjectId(id),
+      };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          advertised: true,
+        },
+      };
+      const result = await productsCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
+
     // api to delete a product
     app.delete("/products/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
