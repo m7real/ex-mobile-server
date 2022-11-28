@@ -39,6 +39,7 @@ async function run() {
     const categoriesCollection = client.db("exMobile").collection("categories");
     const usersCollection = client.db("exMobile").collection("users");
     const productsCollection = client.db("exMobile").collection("products");
+    const bookingsCollection = client.db("exMobile").collection("bookings");
     const blogsCollection = client.db("foodFly").collection("blogs");
     const faqsCollection = client.db("foodFly").collection("faqs");
 
@@ -73,6 +74,14 @@ async function run() {
       const query = {};
       const categories = await categoriesCollection.find(query).toArray();
       res.send(categories);
+    });
+
+    // api to get stats
+    app.get("/stats", async (req, res) => {
+      const usersCount = await usersCollection.estimatedDocumentCount();
+      const productsCount = await productsCollection.estimatedDocumentCount();
+      const bookingsCount = await bookingsCollection.estimatedDocumentCount();
+      res.send({ usersCount });
     });
 
     // api to get advertised products
