@@ -119,7 +119,9 @@ async function run() {
       const info = req.body.info;
       const decodedEmail = req.decoded.email;
 
-      let filter = {};
+      let filter = {
+        _id: ObjectId(id),
+      };
       const options = { upsert: true };
 
       let updatedDoc = {};
@@ -129,13 +131,16 @@ async function run() {
           return res.status(403).send({ message: "forbidden access" });
         }
 
-        filter = {
-          _id: ObjectId(id),
-        };
-
         updatedDoc = {
           $set: {
             advertised: true,
+          },
+        };
+      }
+      if (info === "reported") {
+        updatedDoc = {
+          $set: {
+            reported: true,
           },
         };
       }
