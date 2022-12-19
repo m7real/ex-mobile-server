@@ -40,8 +40,8 @@ async function run() {
     const usersCollection = client.db("exMobile").collection("users");
     const productsCollection = client.db("exMobile").collection("products");
     const bookingsCollection = client.db("exMobile").collection("bookings");
-    const blogsCollection = client.db("foodFly").collection("blogs");
-    const faqsCollection = client.db("foodFly").collection("faqs");
+    const blogsCollection = client.db("exMobile").collection("blogs");
+    const faqsCollection = client.db("exMobile").collection("faqs");
 
     // middleware to verify Admin
     // !NOTE: make sure you use verifyAdmin only after verifyJWT
